@@ -1,0 +1,67 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/Mux.hdl
+
+CHIP Mux8Way {
+    IN a, b, c, d, e, f, g , h, sel[3];
+    OUT out;
+
+    PARTS:
+    //NOTs
+    Not (in = sel[0], out = NotSel0);
+    Not (in = sel[1], out = NotSel1);
+    Not (in = sel[2], out = NotSel2);
+
+    //First AND 000 = a
+    And (a = a, b = NotSel0, out = ANDa1);
+    And (a = ANDa1 , b = NotSel1, out = ANDa2);
+    And (a = ANDa2 , b = NotSel2, out = ANDa);
+
+ 	//Second AND 001 = b
+    And (a = b, b = sel[0], out = ANDb1);
+    And (a = ANDb1 , b = NotSel1, out = ANDb2);
+    And (a = ANDb2 , b = NotSel2, out = ANDb);
+
+    //Third AND 010 = c
+    And (a = c, b = NotSel0, out = ANDc1);
+    And (a = ANDc1 , b = sel[1], out = ANDc2);
+    And (a = ANDc2 , b = NotSel2, out = ANDc);
+
+	//Fourth AND 011 = d
+    And (a = d, b = sel[0], out = ANDd1);
+    And (a = ANDd1 , b = sel[1], out = ANDd2);
+    And (a = ANDd2 , b = NotSel2, out = ANDd);
+
+    //Fifth AND 100 = e
+    And (a = e, b = NotSel0, out = ANDe1);
+    And (a = ANDe1 , b = NotSel1, out = ANDe2);
+    And (a = ANDe2 , b = sel[2], out = ANDe);
+
+    //Sixth AND 101 = f
+    And (a = f, b = sel[0], out = ANDf1);
+    And (a = ANDf1 , b = NotSel1, out = ANDf2);
+    And (a = ANDf2 , b = sel[2], out = ANDf);
+
+    //Seventh AND 110 = g
+    And (a = g, b = NotSel0, out = ANDg1);
+    And (a = ANDg1 , b = sel[1], out = ANDg2);
+    And (a = ANDg2 , b = sel[2], out = ANDg);
+
+
+    //Eight AND 111 = h
+    And (a = h, b = sel[0], out = ANDh1);
+    And (a = ANDh1 , b = sel[1], out = ANDh2);
+    And (a = ANDh2 , b = sel[2], out = ANDh);
+
+
+    //OR the four in succession
+    Or (a = ANDa, b = ANDb, out = outOR1);
+    Or (a = outOR1, b = ANDc, out = outOR2);
+    Or (a = outOR2, b = ANDd, out = outOR3);
+    Or (a = outOR3, b = ANDe, out = outOR4);
+    Or (a = outOR4, b = ANDf, out = outOR5);
+    Or (a = outOR5, b = ANDg, out = outOR6);
+    Or (a = outOR6, b = ANDh, out = out);
+
+}
