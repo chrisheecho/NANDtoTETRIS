@@ -31,10 +31,32 @@ CHIP ALU {
         x[16], y[16],  // 16-bit inputs        
         zx, // zero the x input?
         nx, // negate the x input?
+        // 2's complement Flip all the value and add one
         zy, // zero the y input?
         ny, // negate the y input?
         f,  // compute out = x + y (if 1) or x & y (if 0)
         no; // negate the out output?
+
+        //zero - x or y 
+        Mux16(a = x, y = 000000000000, sel = zx, out = zxout);
+        Mux16(a = x, y = 000000000000, sel = zy, out = zxyout);
+
+        //negate - nx and ny
+        Not16(a = x, out = xnot);
+        Not16(a = y, out = ynot);
+
+        //choose nx based on input
+        Mux16(a = x, y = xnot, sel = nx, out = nxout);
+        Mux16(a = x, y = ynot, sel = ny, out = nyout);
+
+        //x+y AND x and y
+        Add16 (a = x, b = y, out = xplusy);
+        And16 (a = x, b = y, out = xandy);
+        Mux16(a = xandy, b = xplusy, sel = f, out = output);
+
+        //bitwise not
+        Mux()
+
 
     OUT 
         out[16], // 16-bit output
@@ -42,5 +64,6 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
+
    // Put you code here:
 }
