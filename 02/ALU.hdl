@@ -16,12 +16,12 @@
 
 // Implementation: the ALU logic manipulates the x and y inputs
 // and operates on the resulting values, as follows:
-// if (zx == 1) set x = 0        // 16-bit constant
-// if (nx == 1) set x = !x       // bitwise not
-// if (zy == 1) set y = 0        // 16-bit constant
-// if (ny == 1) set y = !y       // bitwise not
-// if (f == 1)  set out = x + y  // integer 2's complement addition
-// if (f == 0)  set out = x & y  // bitwise and
+// if (zx == 1) set x = 0        // 16-bit constant -
+// if (nx == 1) set x = !x       // bitwise not -
+// if (zy == 1) set y = 0        // 16-bit constant -
+// if (ny == 1) set y = !y       // bitwise not -
+// if (f == 1)  set out = x + y  // integer 2's complement addition -
+// if (f == 0)  set out = x & y  // bitwise and -
 // if (no == 1) set out = !out   // bitwise not
 // if (out == 0) set zr = 1
 // if (out < 0) set ng = 1
@@ -37,33 +37,39 @@ CHIP ALU {
         f,  // compute out = x + y (if 1) or x & y (if 0)
         no; // negate the out output?
 
-        //zero - x or y 
-        Mux16(a = x, y = 000000000000, sel = zx, out = zxout);
-        Mux16(a = x, y = 000000000000, sel = zy, out = zxyout);
-
-        //negate - nx and ny
-        Not16(a = x, out = xnot);
-        Not16(a = y, out = ynot);
-
-        //choose nx based on input
-        Mux16(a = x, y = xnot, sel = nx, out = nxout);
-        Mux16(a = x, y = ynot, sel = ny, out = nyout);
-
-        //x+y AND x and y
-        Add16 (a = x, b = y, out = xplusy);
-        And16 (a = x, b = y, out = xandy);
-        Mux16(a = xandy, b = xplusy, sel = f, out = output);
-
-        //bitwise not
-        Mux()
-
-
     OUT 
         out[16], // 16-bit output
         zr, // 1 if (out == 0), 0 otherwise
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
+    //zero - x or y 
+    Mux16 (a = x, b = false, sel = zx, out = zxout);
+    Mux16 (a = y, b = false, sel = zy, out = zyout);
 
-   // Put you code here:
+    //negate - nx and ny with input from zeros
+    Not16 (in = zxout, out = xnot);
+    Not16 (in = zyout, out = ynot);
+
+    //choose nx based on input
+    Mux16 (a = zxout, b = xnot, sel = nx, out = nxout);
+    Mux16 (a = zyout, b = ynot, sel = ny, out = nyout);
+
+    //x+y AND x and y
+    Add16 (a = nxout, b = nyout, out = xplusy);
+    And16 (a = nxout, b = nyout, out = xandy);
+    Mux16 (a = xandy, b = xplusy, sel = f, out = plusand);
+
+    //bitwise not
+    Not16 (in = plusand, out = plusandnot);
+    Mux16 (a = plusand, b = plusandnot, sel = no, out = out, out[15] = ng, out[0..7] = zr1, out[8..15] = zr2);
+
+    //output management
+    Or8Way (in = zr1, out = out1);
+    Or8Way (in = zr2, out = out2);
+    Or     (a = out1, b = out2, out = zr)
+   // Mux (a = true, b = false, sel = out[15], zr = out);
+    //Mux (a = true, b = false, sel = out[15], ng = out);
+
+
 }
