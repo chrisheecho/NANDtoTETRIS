@@ -67,9 +67,10 @@ CHIP ALU {
     //output management
     Or8Way (in = zr1, out = out1);
     Or8Way (in = zr2, out = out2);
-    Or     (a = out1, b = out2, out = zr)
+    Or     (a = out1, b = out2, out = zrout);
+    Not    (in = zrout, out = zr);
+
    // Mux (a = true, b = false, sel = out[15], zr = out);
     //Mux (a = true, b = false, sel = out[15], ng = out);
-
 
 }
